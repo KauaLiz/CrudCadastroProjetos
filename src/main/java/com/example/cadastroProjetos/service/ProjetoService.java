@@ -3,10 +3,7 @@ package com.example.cadastroProjetos.service;
 import com.example.cadastroProjetos.customException.RecursoNaoEncontradoException;
 import com.example.cadastroProjetos.customException.RegraNegocioException;
 import com.example.cadastroProjetos.customException.ValidacaoException;
-import com.example.cadastroProjetos.model.dto.MembroDto;
-import com.example.cadastroProjetos.model.dto.ProjetoDto;
-import com.example.cadastroProjetos.model.dto.ProjetoRequestDto;
-import com.example.cadastroProjetos.model.dto.ProjetoResponseDto;
+import com.example.cadastroProjetos.model.dto.*;
 import com.example.cadastroProjetos.model.entity.ProjetoEntity;
 import com.example.cadastroProjetos.model.enums.ClassificacaoRisco;
 import com.example.cadastroProjetos.model.enums.Status;
@@ -15,8 +12,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -107,6 +105,69 @@ public class ProjetoService {
         repository.save(projeto);
     }
 
+    public RelatorioDto retornarDadosRelatorio(){
+        List<ProjetoEntity> projetos = repository.findAll();
+
+        Map<Status, Long> qtdProjetosStatus = new HashMap<>();
+        for (ProjetoEntity projeto : projetos){
+            Status status = projeto.getStatus();
+
+            if(!qtdProjetosStatus.containsKey(status)){
+                qtdProjetosStatus.put(status, 0L);
+            }
+
+            qtdProjetosStatus.put(status, qtdProjetosStatus.get(status) + 1);
+        }
+
+        Map<Status, BigDecimal> totalOrcadoStatus = new HashMap<>();
+        BigDecimal valorAtual = null;
+        for (ProjetoEntity projeto : projetos){
+            Status status = projeto.getStatus();
+            valorAtual = totalOrcadoStatus.getOrDefault(status,BigDecimal.ZERO);
+
+            totalOrcadoStatus.put(status, valorAtual.add(projeto.getOrcamento()));
+        }
+
+        Long qtdProjetos = 0L;
+        Long meses = 0L;
+
+        for(ProjetoEntity projeto : projetos){
+            Status status = projeto.getStatus();
+
+            if(status == Status.ENCERRADO){
+                Long difTempo = ChronoUnit.MONTHS.between(projeto.getDataInicio(), projeto.getDataTermino());
+                meses = meses + difTempo;
+                qtdProjetos++;
+            }
+        }
+
+        Long mediaDuracaoProjetos = 0L;
+        if(qtdProjetos > 0) {
+            mediaDuracaoProjetos = meses / qtdProjetos;
+        } else {
+            mediaDuracaoProjetos = 0L;
+        }
+
+        Set<Long> qtdMembroUnico = new HashSet<>();
+
+        for(ProjetoEntity projeto: projetos){
+            for(Long membroId : projeto.getMembrosIds()){
+                qtdMembroUnico.add(membroId);
+            }
+        }
+
+        long qtdMembrosUnicos = qtdMembroUnico.size();
+
+        RelatorioDto relatorioDto = new RelatorioDto(
+                qtdProjetosStatus,
+                totalOrcadoStatus,
+                mediaDuracaoProjetos,
+                qtdMembrosUnicos
+        );
+
+        return relatorioDto;
+    }
+
     public ProjetoResponseDto transformarDto(ProjetoEntity projeto) {
         return new ProjetoResponseDto(
                 projeto.getNome(),
@@ -182,6 +243,8 @@ public class ProjetoService {
                 return Status.INICIADO;
             case INICIADO:
                 return Status.PLANEJADO;
+            case PLANEJADO:
+                return Status.EM_ANDAMENTO;
             case EM_ANDAMENTO:
                 return Status.ENCERRADO;
             default:
@@ -195,6 +258,11 @@ public class ProjetoService {
                         new RecursoNaoEncontradoException("Projeto com ID " + id + " não encontrado")
                 );
         Status proximoStatus = retornaProximoStatus(projeto.getStatus());
+
+        if(proximoStatus == Status.ENCERRADO){
+            projeto.setDataTermino(LocalDate.now());
+        }
+        
         projeto.setStatus(proximoStatus);
         repository.save(projeto);
     }

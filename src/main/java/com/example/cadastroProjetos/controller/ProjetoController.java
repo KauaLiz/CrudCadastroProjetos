@@ -3,6 +3,7 @@ package com.example.cadastroProjetos.controller;
 import com.example.cadastroProjetos.model.dto.ProjetoDto;
 import com.example.cadastroProjetos.model.dto.ProjetoRequestDto;
 import com.example.cadastroProjetos.model.dto.ProjetoResponseDto;
+import com.example.cadastroProjetos.model.dto.RelatorioDto;
 import com.example.cadastroProjetos.service.ProjetoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,7 +49,17 @@ public class ProjetoController {
         return ResponseEntity.ok(service.mostrarProjetos());
     }
 
-    //@GetMapping - gerar relatório
+    @Operation(summary = "Retornar dados para gerar relatório", method = "GET")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Relatório gerado com sucesso"),
+            @ApiResponse(responseCode = "422", description = "Dados da requisição inválidos"),
+            @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
+            @ApiResponse(responseCode = "500", description = "Erro ao gerar relatório"),
+    })
+    @GetMapping("/gerarRelatorio")
+    public ResponseEntity<RelatorioDto> gerarRelatorio() {
+        return ResponseEntity.ok(service.retornarDadosRelatorio());
+    }
 
     @Operation(summary = "Associar membros ao projeto", method = "PATCH")
     @ApiResponses(value = {
