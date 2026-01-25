@@ -1,7 +1,7 @@
 package com.example.cadastroProjetos.model.enums;
 
 public enum UserRole {
-    GERENTE("Gerente"),
+    ADMINISTRADOR("Administrador"),
     MEMBRO("Membro");
 
     private String role;

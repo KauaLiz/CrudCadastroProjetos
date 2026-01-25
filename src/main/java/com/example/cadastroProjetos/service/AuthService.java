@@ -34,6 +34,7 @@ public class AuthService {
         var username = new UsernamePasswordAuthenticationToken(data.login(), data.senha());
         var auth = this.authenticationManager.authenticate(username);
 
+
         var token = tokenService.gerarToken((UserEntity) auth.getPrincipal());
         return ResponseEntity.ok(new LoginResponseDto(token));
     }
