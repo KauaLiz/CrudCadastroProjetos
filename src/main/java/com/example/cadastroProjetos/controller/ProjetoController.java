@@ -1,5 +1,6 @@
 package com.example.cadastroProjetos.controller;
 
+import com.example.cadastroProjetos.infra.security.SecurityConfiguration;
 import com.example.cadastroProjetos.model.dto.ProjetoDto;
 import com.example.cadastroProjetos.model.dto.ProjetoRequestDto;
 import com.example.cadastroProjetos.model.dto.ProjetoResponseDto;
@@ -8,7 +9,9 @@ import com.example.cadastroProjetos.service.ProjetoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,21 +21,22 @@ import java.util.List;
 
 @RestController
 @RequestMapping(path = "/projeto", produces = {"application/json"})
-@Tag(name = "open-api")
+@Tag(name = "Criar e Editar Projetos")
+@SecurityRequirement(name = SecurityConfiguration.SECURITY)
 public class ProjetoController {
 
     @Autowired
-    ProjetoService service;
+    private ProjetoService service;
 
     @Operation(summary = "Criar Projeto", method = "POST")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Projeto criado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados da requisição inválidos"),
             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro ao criar projeto"),
+            @ApiResponse(responseCode = "500", description = "Erro no servidor"),
     })
     @PostMapping(path = "/criar", consumes = {"application/json"})
-    public ResponseEntity<String> criarProjeto(@RequestBody ProjetoDto data) {
+    public ResponseEntity<String> criarProjeto(@RequestBody @Valid ProjetoDto data) {
         service.criar(data);
         return ResponseEntity.status(HttpStatus.CREATED).body("Projeto criado com sucesso");
     }
@@ -42,7 +46,7 @@ public class ProjetoController {
             @ApiResponse(responseCode = "201", description = "Busca realizada com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados da requisição inválidos"),
             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro ao buscar projetos"),
+            @ApiResponse(responseCode = "500", description = "Erro no servidor"),
     })
     @GetMapping("/mostrarProjetos")
     public ResponseEntity<List<ProjetoResponseDto>> mostrarProjetos() {
@@ -54,7 +58,7 @@ public class ProjetoController {
             @ApiResponse(responseCode = "201", description = "Relatório gerado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados da requisição inválidos"),
             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro ao gerar relatório"),
+            @ApiResponse(responseCode = "500", description = "Erro no servidor"),
     })
     @GetMapping("/gerarRelatorio")
     public ResponseEntity<RelatorioDto> gerarRelatorio() {
@@ -66,7 +70,7 @@ public class ProjetoController {
             @ApiResponse(responseCode = "201", description = "Membro Associado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados da requisição inválidos"),
             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro ao associar membro"),
+            @ApiResponse(responseCode = "500", description = "Erro no servidor"),
     })
     @PatchMapping("/associar/{id}")
     public ResponseEntity<ProjetoResponseDto> associarMembro(@PathVariable long id, @RequestBody ProjetoRequestDto data) {
@@ -78,7 +82,7 @@ public class ProjetoController {
             @ApiResponse(responseCode = "201", description = "Projeto atualizado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados da requisição inválidos"),
             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro ao atualizar projeto"),
+            @ApiResponse(responseCode = "500", description = "Erro no servidor"),
     })
     @PatchMapping("/avancarStatus/{id}")
     public ResponseEntity<String> avancarStatus(@PathVariable long id) {
@@ -91,7 +95,7 @@ public class ProjetoController {
             @ApiResponse(responseCode = "201", description = "Projeto cancelado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados da requisição inválidos"),
             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro ao cancelar projeto"),
+            @ApiResponse(responseCode = "500", description = "Erro no servidor"),
     })
     @PatchMapping("/cancelar/{id}")
     public ResponseEntity<String> CancelarProjeto(@PathVariable long id) {
@@ -104,7 +108,7 @@ public class ProjetoController {
             @ApiResponse(responseCode = "201", description = "Projeto deletado com sucesso"),
             @ApiResponse(responseCode = "422", description = "Dados da requisição inválidos"),
             @ApiResponse(responseCode = "400", description = "Parâmetros inválidos"),
-            @ApiResponse(responseCode = "500", description = "Erro ao deletar projeto"),
+            @ApiResponse(responseCode = "500", description = "Erro no servidor"),
     })
     @DeleteMapping("/deletar/{id}")
     public ResponseEntity<String> deletarProjeto(@PathVariable long id) {

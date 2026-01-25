@@ -2,6 +2,7 @@ package com.example.cadastroProjetos.controller;
 
 import com.example.cadastroProjetos.model.dto.MembroDto;
 import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class MembroMockController {
     private Long id = 1L;
 
     @PostMapping("/criar")
-    public ResponseEntity<String> criarMembro(@RequestBody MembroDto data) {
+    public ResponseEntity<String> criarMembro(@RequestBody @Valid MembroDto data) {
         MembroDto membroEntity = data;
         bancoMembro.put(id++, membroEntity);
 
