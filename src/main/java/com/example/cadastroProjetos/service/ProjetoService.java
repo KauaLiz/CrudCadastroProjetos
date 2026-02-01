@@ -21,53 +21,32 @@ import java.util.*;
 public class ProjetoService {
 
     @Autowired
-    ProjetoRepository repository;
+    private ProjetoRepository repository;
 
     @Autowired
-    MembroApiMockada membroApiMockada;
+    private MembroApiMockada membroApiMockada;
 
     private ProjetoEntity projeto;
 
-    public void validarGerenteEMembro(ProjetoDto data, List<Long> membrosIds) {
+    public void validarMembroIndividual(Long membroId ) {
+            MembroDto membro = membroApiMockada.consultarID(membroId);
+
+            if (membro == null) throw new RecursoNaoEncontradoException("Membro do código " + membroId + " não encontrado");
+            if (!membro.cargo().equalsIgnoreCase("funcionário")) throw new RegraNegocioException("Membro com cargo diferente de funcionário");
+            if (!membroPodeSerAlocado(membroId)) throw new RegraNegocioException("Membro com o ID " + membroId + " já está em 3 ou mais projetos");
+    }
+
+    public void ValidarGerenteEMembro(ProjetoDto data, List<Long> membrosIds){
         MembroDto gerente = membroApiMockada.consultarID(data.gerenteId());
 
-        if (gerente == null) {
-            throw new RecursoNaoEncontradoException("Gerente não encontrado");
-        }
+        if(gerente == null) throw new RecursoNaoEncontradoException("Gerente não encontrado");
+        if(!gerente.cargo().equalsIgnoreCase("gerente")) throw new RegraNegocioException("Membro não pode ser um Gerente");
+        if(membrosIds.contains(data.gerenteId())) throw new RegraNegocioException("Gerente não pode ser um membro");
 
-        if (!"gerente".equalsIgnoreCase(gerente.cargo())) {
-            throw new RegraNegocioException("Cargo deve ser de Gerente");
-        }
+        if (membrosIds.isEmpty() || membrosIds.size() > 10) throw new ValidacaoException("Quantidade inválida de membros");
+        if (membrosIds.size() != membrosIds.stream().distinct().count()) throw new ValidacaoException("Há membros repetidos");
 
-        if (membrosIds.contains(data.gerenteId())) {
-            throw new RegraNegocioException("Gerente não pode ser membro");
-        }
-
-        if (membrosIds.isEmpty() || membrosIds.size() > 10) {
-            throw new ValidacaoException("Quantidade inválida de membros");
-        }
-
-        //Duplicados
-        if (membrosIds.size() != membrosIds.stream().distinct().count()) {
-            throw new ValidacaoException("Há membros repetidos");
-        }
-
-        //Verifica cada membro
-        for (Long id : membrosIds) {
-            MembroDto membro = membroApiMockada.consultarID(id);
-
-            if (membro == null) {
-                throw new RecursoNaoEncontradoException("Membro do código " + id + " não encontrado");
-            }
-
-            if (!membro.cargo().equalsIgnoreCase("funcionário")) {
-                throw new RegraNegocioException("Membro com cargo diferente de funcionário");
-            }
-
-            if (!membroPodeSerAlocado(id)) {
-                throw new RegraNegocioException("Membro com o ID " + id + " já está em 3 ou mais projetos");
-            }
-        }
+        membrosIds.forEach(this::validarMembroIndividual);
     }
 
     public boolean membroPodeSerAlocado(long membroId) {
@@ -77,7 +56,7 @@ public class ProjetoService {
     public void criar(ProjetoDto data) {
         //Validação Gerente e Membro
         List<Long> membrosIds = data.membrosIds();
-        validarGerenteEMembro(data, membrosIds);
+        ValidarGerenteEMembro(data, membrosIds);
 
         //Criação Projeto
         ProjetoEntity projeto = new ProjetoEntity();
@@ -199,37 +178,18 @@ public class ProjetoService {
         List<Long> membrosAtuais = projeto.getMembrosIds();
         List<Long> membrosRequest = data.membrosIds();
 
-        if (membrosAtuais.size() + membrosRequest.size() > 10) {
-            throw new ValidacaoException("Quantidade de membros excede 10");
-        }
+        if (membrosAtuais.size() + membrosRequest.size() > 10) throw new ValidacaoException("Quantidade de membros excede 10");
 
         for(Long idRequest : membrosRequest){
-            if(membrosAtuais.contains(idRequest)){
-                throw new ValidacaoException("Membro com o ID " + idRequest +" já está incluso no projeto");
-            }
+            if(membrosAtuais.contains(idRequest)) throw new ValidacaoException("Membro com o ID " + idRequest +" já está incluso no projeto");
         }
 
-        if (membrosAtuais.contains(projeto.getGerenteID())) {
-            throw new RegraNegocioException("Gerente não pode ser membro");
-        }
+        if (membrosAtuais.contains(projeto.getGerenteID())) throw new RegraNegocioException("Gerente não pode ser membro");
 
-        //Verifica cada membro
-        for (Long idMembros : membrosRequest) {
-            MembroDto membro = membroApiMockada.consultarID(idMembros);
+        membrosRequest.forEach(this::validarMembroIndividual);
 
-            if (membro == null) {
-                throw new RecursoNaoEncontradoException("Membro do código " + idMembros + " não encontrado");
-            }
-
-            if (!membro.cargo().equalsIgnoreCase("funcionário")) {
-                throw new RegraNegocioException("Membro com cargo diferente de funcionário");
-            }
-
-            if (!membroPodeSerAlocado(idMembros)) {
-                throw new RegraNegocioException("Membro com o ID " + idMembros + " já está em 3 ou mais projetos");
-            }
-        }
         membrosAtuais.addAll(membrosRequest);
+        projeto.setMembrosIds(membrosAtuais);
         return transformarDto(projeto);
     }
 
