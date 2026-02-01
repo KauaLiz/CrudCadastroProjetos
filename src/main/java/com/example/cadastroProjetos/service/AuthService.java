@@ -16,19 +16,19 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     @Autowired
-    UserRepository repository;
+    private UserRepository repository;
 
     @Autowired
-    AuthenticationManager authenticationManager;
+    private AuthenticationManager authenticationManager;
 
     @Autowired
-    AutorizacaoService autorizacaoService;
+    private AutorizacaoService autorizacaoService;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    TokenService tokenService;
+    private TokenService tokenService;
 
     public ResponseEntity<LoginResponseDto> login(AuthenticationDto data){
         var username = new UsernamePasswordAuthenticationToken(data.login(), data.senha());
