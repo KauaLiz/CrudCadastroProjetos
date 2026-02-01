@@ -36,7 +36,7 @@ public class ProjetoService {
             if (!membroPodeSerAlocado(membroId)) throw new RegraNegocioException("Membro com o ID " + membroId + " já está em 3 ou mais projetos");
     }
 
-    public void ValidarGerenteEMembro(ProjetoDto data, List<Long> membrosIds){
+    public void validarGerenteEMembro(ProjetoDto data, List<Long> membrosIds){
         MembroDto gerente = membroApiMockada.consultarID(data.gerenteId());
 
         if(gerente == null) throw new RecursoNaoEncontradoException("Gerente não encontrado");
@@ -56,7 +56,7 @@ public class ProjetoService {
     public void criar(ProjetoDto data) {
         //Validação Gerente e Membro
         List<Long> membrosIds = data.membrosIds();
-        ValidarGerenteEMembro(data, membrosIds);
+        validarGerenteEMembro(data, membrosIds);
 
         //Criação Projeto
         ProjetoEntity projeto = new ProjetoEntity();
