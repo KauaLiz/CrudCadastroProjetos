@@ -13,9 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,7 +41,7 @@ class ProjetoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve retornar exceção referente a membro não encontrado")
+    @DisplayName("Deve retornar exceção quando ID do membro não for encontrado")
     void validarMembroNaoEncontrado() {
         when(membroApiMockada.consultarID(1L)).thenReturn(null);
 
@@ -61,10 +62,10 @@ class ProjetoServiceTest {
 
     @Test
     @DisplayName("Deve retornar exceção se membro já estiver em pelo menos 3 projetos")
-    void validarMembroLimiteProjetos() {
+    void validarLimiteTresMembrosPorProjeto() {
         when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
 
-        when(repository.contarProjetosMembroAtivo(1L, List.of(Status.CANCELADO, Status.ENCERRADO))).thenReturn(3L);
+        when(repository.contarProjetosMembroAtivo(1L, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(4L);
 
         assertThrows(RegraNegocioException.class, () ->{
             projetoService.validarMembroIndividual(1L);
