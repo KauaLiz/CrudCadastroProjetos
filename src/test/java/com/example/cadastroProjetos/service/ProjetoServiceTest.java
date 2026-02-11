@@ -2,9 +2,9 @@ package com.example.cadastroProjetos.service;
 
 import com.example.cadastroProjetos.customException.RecursoNaoEncontradoException;
 import com.example.cadastroProjetos.customException.RegraNegocioException;
+import com.example.cadastroProjetos.customException.ValidacaoException;
 import com.example.cadastroProjetos.model.dto.MembroDto;
 import com.example.cadastroProjetos.model.dto.ProjetoDto;
-import com.example.cadastroProjetos.model.entity.ProjetoEntity;
 import com.example.cadastroProjetos.model.enums.Status;
 import com.example.cadastroProjetos.repository.ProjetoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +62,7 @@ class ProjetoServiceTest {
 
     @Test
     @DisplayName("Deve retornar exceção se membro já estiver em pelo menos 3 projetos")
-    void validarLimiteTresMembrosPorProjeto() {
+    void validarLimiteTresMembrosPorProjeto(){
         when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
 
         when(repository.contarProjetosMembroAtivo(1L, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(4L);
