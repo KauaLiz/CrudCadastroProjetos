@@ -26,28 +26,35 @@ public class ProjetoService {
     @Autowired
     private MembroApiMockada membroApiMockada;
 
-    private ProjetoEntity projeto;
-
-    public void validarMembroIndividual(Long membroId ) {
-            MembroDto membro = membroApiMockada.consultarID(membroId);
-
-            if (membro == null) throw new RecursoNaoEncontradoException("Membro do código " + membroId + " não encontrado");
-            if (!membro.cargo().equalsIgnoreCase("funcionário")) throw new RegraNegocioException("Membro com cargo diferente de funcionário");
-            if (!membroPodeSerAlocado(membroId)) throw new RegraNegocioException("Membro com o ID " + membroId + " já está em 3 ou mais projetos");
+    public void validarEquipe(ProjetoDto data, List<Long> membrosId){
+        validarGerente(data, membrosId);
+        validarQuantidadeMembros(membrosId);
     }
 
-    public void validarGerenteEMembro(ProjetoDto data, List<Long> membrosIds){
-        MembroDto gerente = membroApiMockada.consultarID(data.gerenteId());
+    public void validarMembroIndividual(Long membroId ) {
+        MembroDto membro = membroApiMockada.consultarID(membroId);
 
-        if(gerente == null) throw new RecursoNaoEncontradoException("Gerente não encontrado");
-        if(!gerente.cargo().equalsIgnoreCase("gerente")) throw new RegraNegocioException("Membro não pode ser um Gerente");
-        if(membrosIds.contains(data.gerenteId())) throw new RegraNegocioException("Gerente não pode ser um membro");
+        if (membro == null) throw new RecursoNaoEncontradoException("Membro do código " + membroId + " não encontrado");
+        if (!membro.cargo().equalsIgnoreCase("funcionário")) throw new RegraNegocioException("Membro com cargo diferente de funcionário");
+        if (!membroPodeSerAlocado(membroId)) throw new RegraNegocioException("Membro com o ID " + membroId + " já está em 3 ou mais projetos");
+    }
 
+    public void validarQuantidadeMembros(List<Long> membrosIds){
         if (membrosIds.isEmpty() || membrosIds.size() > 10) throw new ValidacaoException("Quantidade inválida de membros");
         if (membrosIds.size() != membrosIds.stream().distinct().count()) throw new ValidacaoException("Há membros repetidos");
 
         membrosIds.forEach(this::validarMembroIndividual);
     }
+
+    public void validarGerente(ProjetoDto data, List<Long> membrosIds){
+        MembroDto gerente = membroApiMockada.consultarID(data.gerenteId());
+
+        if(gerente == null) throw new RecursoNaoEncontradoException("Gerente não encontrado");
+        if(!gerente.cargo().equalsIgnoreCase("gerente")) throw new RegraNegocioException("Membro não pode ser um Gerente");
+        if(membrosIds.contains(data.gerenteId())) throw new RegraNegocioException("Gerente não pode ser um membro");
+    }
+
+
 
     public boolean membroPodeSerAlocado(long membroId) {
         return repository.contarProjetosMembroAtivo(membroId, List.of(Status.ENCERRADO, Status.CANCELADO)) < 3;
@@ -56,7 +63,7 @@ public class ProjetoService {
     public void criar(ProjetoDto data) {
         //Validação Gerente e Membro
         List<Long> membrosIds = data.membrosIds();
-        validarGerenteEMembro(data, membrosIds);
+        validarEquipe(data, membrosIds);
 
         //Criação Projeto
         ProjetoEntity projeto = new ProjetoEntity();
@@ -75,7 +82,7 @@ public class ProjetoService {
 
         if (data.orcamento().compareTo(new BigDecimal("100000")) <= 0 && dias <= 90) {
             projeto.setRisco(ClassificacaoRisco.BAIXO);
-        } else if ((data.orcamento().compareTo(new BigDecimal("100001")) > 0 && data.orcamento().compareTo(new BigDecimal("500000")) <= 0) || dias > 90 && dias < 180) {
+        } else if ((data.orcamento().compareTo(new BigDecimal("100001")) > 0 && data.orcamento().compareTo(new BigDecimal("500000")) <= 0) || (dias > 90 && dias < 180)) {
             projeto.setRisco(ClassificacaoRisco.MEDIO);
         } else {
             projeto.setRisco(ClassificacaoRisco.ALTO);
@@ -222,7 +229,7 @@ public class ProjetoService {
         if(proximoStatus == Status.ENCERRADO){
             projeto.setDataTermino(LocalDate.now());
         }
-        
+
         projeto.setStatus(proximoStatus);
         repository.save(projeto);
     }
@@ -246,4 +253,3 @@ public class ProjetoService {
         repository.delete(projeto);
     }
 }
-

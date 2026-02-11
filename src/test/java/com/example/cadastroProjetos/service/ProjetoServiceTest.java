@@ -3,6 +3,7 @@ package com.example.cadastroProjetos.service;
 import com.example.cadastroProjetos.customException.RecursoNaoEncontradoException;
 import com.example.cadastroProjetos.customException.RegraNegocioException;
 import com.example.cadastroProjetos.model.dto.MembroDto;
+import com.example.cadastroProjetos.model.dto.ProjetoDto;
 import com.example.cadastroProjetos.model.entity.ProjetoEntity;
 import com.example.cadastroProjetos.model.enums.Status;
 import com.example.cadastroProjetos.repository.ProjetoRepository;
