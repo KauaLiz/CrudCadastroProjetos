@@ -83,6 +83,16 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar exceção se houver membros repetidos ao criar projeto")
+    void validarMembrosRepetidos(){
+        List<Long> membrosId = List.of(1L,2L,2L,4L,5L,6L,7L,8L,9L,10L,11L);
+
+        assertThrows(ValidacaoException.class, () -> {
+            projetoService.validarQuantidadeMembros(membrosId);
+        });
+    }
+
+    @Test
     @DisplayName("Deve retonar exceção quando não houver um gerente existente")
     void validarGerenteNaoEncontrado() {
         ProjetoDto projetoDto = new ProjetoDto(
@@ -115,11 +125,6 @@ class ProjetoServiceTest {
 
     @Test
     void validarQuantidadeInvalidaMembros() {
-
-    }
-
-    @Test
-    void validarMembrosRepetidos() {
 
     }
 
