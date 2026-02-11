@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -114,8 +115,25 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void validarMembroNaoEGerente() {
+    @DisplayName("Deve retornar uma exceção quando um funcionário for atribuido como gerente de um projeto ")
+    void membroNaoPodeSerGerente() {
+        ProjetoDto projetoTeste = new ProjetoDto(
+                "ProjetoTeste",
+                LocalDate.now(),
+                LocalDate.now().plusMonths(2),
+                null,
+                new BigDecimal("500"),
+                "ProjetoTeste",
+                1L,
+                null
+        );
 
+        when(membroApiMockada.consultarID(projetoTeste.gerenteId()))
+                .thenReturn(new MembroDto("Kauã", "Funcionário"));
+
+        assertThrows(RegraNegocioException.class, () -> {
+           projetoService.validarGerente(projetoTeste, Collections.emptyList());
+        });
     }
 
     @Test
