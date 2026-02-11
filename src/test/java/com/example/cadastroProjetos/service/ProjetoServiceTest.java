@@ -137,7 +137,31 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void validarGerenteNaoEMembro() {
+    @DisplayName("Deve retornar uma exceção quando um gerente for atribuido como um membro de um projeto ")
+    void GerenteNaoPodeSerMembro() {
+        Long gerenteId = 2L;
+        List<Long> membrosId = List.of(1L,gerenteId,3L,4L);
+        ProjetoDto projetoTeste = new ProjetoDto(
+                "ProjetoTeste",
+                LocalDate.now(),
+                LocalDate.now().plusMonths(2),
+                null,
+                new BigDecimal("500"),
+                "ProjetoTeste",
+                gerenteId,
+                null
+        );
+
+        when(membroApiMockada.consultarID(gerenteId)).thenReturn(new MembroDto("Kauã", "Gerente"));
+
+        assertThrows(RegraNegocioException.class, () -> {
+            projetoService.validarGerente(projetoTeste, membrosId);
+        });
+
+
+
+
+
 
     }
 
