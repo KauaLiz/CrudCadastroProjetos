@@ -43,10 +43,20 @@ class ProjetoServiceTest {
 
     @Test
     @DisplayName("Deve retornar exceção quando ID do membro não for encontrado")
-    void validarMembroNaoEncontrado() {
+    void validarMembroNaoEncontradoFalha() {
         when(membroApiMockada.consultarID(1L)).thenReturn(null);
 
         assertThrows(RecursoNaoEncontradoException.class, () ->{
+            projetoService.validarMembroIndividual(1L);
+        });
+    }
+
+    @Test
+    @DisplayName("Não deve retornar exceção quando ID do membro for encontrado")
+    void validarMembroEncontradoSucesso() {
+        when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
+
+        assertDoesNotThrow(() ->{
             projetoService.validarMembroIndividual(1L);
         });
     }
@@ -157,12 +167,6 @@ class ProjetoServiceTest {
         assertThrows(RegraNegocioException.class, () -> {
             projetoService.validarGerente(projetoTeste, membrosId);
         });
-
-
-
-
-
-
     }
 
     @Test
