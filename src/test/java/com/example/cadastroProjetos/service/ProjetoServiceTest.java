@@ -159,8 +159,8 @@ class ProjetoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve retonar exceção quando não houver um gerente existente")
-    void validarGerenteNaoEncontrado() {
+    @DisplayName("Não deve retonar exceção quando houver um gerente existente")
+    void validarGerenteEncontradoSucesso() {
         ProjetoDto projetoDto = new ProjetoDto(
                 "ProjetoTeste",
                 LocalDate.now(),
@@ -169,7 +169,28 @@ class ProjetoServiceTest {
                 new BigDecimal("500"),
                 "ProjetoTeste",
                 1L,
-                null
+                List.of(2L, 3L)
+        );
+
+        when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Gerente"));
+
+        assertDoesNotThrow(() ->{
+            projetoService.validarGerente(projetoDto, List.of(2L, 3L));
+        });
+    }
+
+    @Test
+    @DisplayName("Deve retonar exceção quando não houver um gerente existente")
+    void validarGerenteNaoEncontradoFalha() {
+        ProjetoDto projetoDto = new ProjetoDto(
+                "ProjetoTeste",
+                LocalDate.now(),
+                LocalDate.now().plusMonths(2),
+                null,
+                new BigDecimal("500"),
+                "ProjetoTeste",
+                1L,
+                List.of(2L, 3L)
         );
 
         when(membroApiMockada.consultarID(1L)).thenReturn(null);
