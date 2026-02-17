@@ -377,6 +377,19 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar relatorio com dados nulos quando for houver projetos existentes")
+    void retornarDadosRelatorioComFalha() {
+        when(repository.findAll()).thenReturn(List.of());
+
+        RelatorioDto data = projetoService.retornarDadosRelatorio();
+
+        assertEquals(0,data.quantidadePorStatus().values().stream().reduce(0L, Long::sum));
+        assertEquals(BigDecimal.ZERO,data.totalOrcadoPorStatus().values().stream().reduce(BigDecimal.valueOf(0),BigDecimal::add));
+        assertEquals(0,data.mediaDuracaoProjetosEncerrados());
+        assertEquals(0,data.totalMembrosUnicos());
+    }
+
+    @Test
     void transformarDto() {
     }
 
