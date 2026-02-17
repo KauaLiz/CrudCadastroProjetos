@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -106,8 +107,24 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Não deve retornar exceção quando houver menos 10 membros no projeto")
+    void validarLimiteDeMembrosNoProjetoSucesso(){
+        List<Long> membrosId = List.of(1L,2L,3L,4L,5L,6L,7L);
+
+        for(Long id : membrosId){
+            when(membroApiMockada.consultarID(id)).thenReturn(new MembroDto("Membro" + id, "Funcionário"));
+
+            when(repository.contarProjetosMembroAtivo(id, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(0L);
+        }
+
+        assertDoesNotThrow(() -> {
+            projetoService.validarQuantidadeMembros(membrosId);
+        });
+    }
+
+    @Test
     @DisplayName("Deve retornar exceção quando passar do limite de 10 membros")
-    void validarLimiteDeMembrosNoProjeto(){
+    void validarLimiteDeMembrosNoProjetoFalha(){
          List<Long> membrosId = List.of(1L,2L,3L,4L,5L,6L,7L,8L,9L,10L,11L);
 
          assertThrows(ValidacaoException.class, () -> {
