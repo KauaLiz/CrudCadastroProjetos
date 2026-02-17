@@ -82,8 +82,20 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Não deve retornar exceção pois o membro não está em pelo menos 3 projetos")
+    void validarLimiteTresMembrosPorProjetoSucesso(){
+        when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
+
+        when(repository.contarProjetosMembroAtivo(1L, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(2L);
+
+        assertDoesNotThrow(() ->{
+            projetoService.validarMembroIndividual(1L);
+        });
+    }
+
+    @Test
     @DisplayName("Deve retornar exceção se membro já estiver em pelo menos 3 projetos")
-    void validarLimiteTresMembrosPorProjeto(){
+    void validarLimiteTresMembrosPorProjetoFalha(){
         when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
 
         when(repository.contarProjetosMembroAtivo(1L, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(4L);
