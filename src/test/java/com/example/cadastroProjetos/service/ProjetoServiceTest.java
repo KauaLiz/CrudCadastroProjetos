@@ -5,27 +5,28 @@ import com.example.cadastroProjetos.customException.RegraNegocioException;
 import com.example.cadastroProjetos.customException.ValidacaoException;
 import com.example.cadastroProjetos.model.dto.MembroDto;
 import com.example.cadastroProjetos.model.dto.ProjetoDto;
+import com.example.cadastroProjetos.model.entity.ProjetoEntity;
+import com.example.cadastroProjetos.model.enums.ClassificacaoRisco;
 import com.example.cadastroProjetos.model.enums.Status;
 import com.example.cadastroProjetos.repository.ProjetoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-
 class ProjetoServiceTest {
 
     @Mock
@@ -293,16 +294,39 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void validarQuantidadeInvalidaMembros() {
+    @DisplayName("Deve criar um projeto")
+    void CriarProjetoComSucesso() {
+        List<Long> membrosId = List.of(1L,2L,3L,4L,5L);
+        Long gerenteId = 6L;
+        ArgumentCaptor<ProjetoEntity> captor = ArgumentCaptor.forClass(ProjetoEntity.class);
 
-    }
+        //Verificar Membros e Gerente
+        when(membroApiMockada.consultarID(gerenteId)).thenReturn(new MembroDto("Kauã","Gerente"));
 
-    @Test
-    void membroPodeSerAlocado() {
-    }
+        for(Long id : membrosId){
+            when(repository.contarProjetosMembroAtivo(id, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(0L);
+            when(membroApiMockada.consultarID(id)).thenReturn(new MembroDto("Fulano" + id, "Funcionário"));
+        }
 
-    @Test
-    void criar() {
+        //Criação Projeto
+        ProjetoDto projetoTeste = new ProjetoDto(
+                "ProjetoTeste",
+                LocalDate.now(),
+                LocalDate.now().plusMonths(2),
+                null,
+                new BigDecimal("500"),
+                "ProjetoTeste",
+                gerenteId,
+                membrosId
+        );
+
+        projetoService.criar(projetoTeste);
+
+        verify(repository, Mockito.times(1)).save(captor.capture());
+        ProjetoEntity entitySalvo = captor.getValue();
+
+        assertEquals(ClassificacaoRisco.BAIXO, entitySalvo.getRisco());
+        assertEquals(Status.EM_ANALISE, entitySalvo.getStatus());
     }
 
     @Test

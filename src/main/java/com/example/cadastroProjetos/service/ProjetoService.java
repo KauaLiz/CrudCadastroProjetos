@@ -54,8 +54,6 @@ public class ProjetoService {
         if(membrosIds.contains(data.gerenteId())) throw new RegraNegocioException("Gerente não pode ser um membro");
     }
 
-
-
     public boolean membroPodeSerAlocado(long membroId) {
         return repository.contarProjetosMembroAtivo(membroId, List.of(Status.ENCERRADO, Status.CANCELADO)) < 3;
     }
