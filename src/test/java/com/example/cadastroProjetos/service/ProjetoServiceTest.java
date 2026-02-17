@@ -245,8 +245,33 @@ class ProjetoServiceTest {
     }
 
     @Test
-    @DisplayName("Deve retornar uma exceção quando um gerente for atribuido como um membro de um projeto ")
-    void GerenteNaoPodeSerMembro() {
+    @DisplayName("Não deve retornar uma exceção quando um funcionário for atribuido corretamente")
+    void validarCargoMembroSucesso() {
+        Long idFuncionario = 1L;
+        Long idGerente = 2L;
+        List<Long> membrosId = List.of(1L,idFuncionario,3L,4L);
+        ProjetoDto projetoTeste = new ProjetoDto(
+                "ProjetoTeste",
+                LocalDate.now(),
+                LocalDate.now().plusMonths(2),
+                null,
+                new BigDecimal("500"),
+                "ProjetoTeste",
+                idGerente,
+                membrosId
+        );
+
+        when(membroApiMockada.consultarID(idGerente)).thenReturn(new MembroDto("Fulano", "Gerente"));
+        when(membroApiMockada.consultarID(idFuncionario)).thenReturn(new MembroDto("Kauã", "Funcionário"));
+
+        assertDoesNotThrow(() -> {
+            projetoService.validarGerente(projetoTeste, membrosId);
+        });
+    }
+
+    @Test
+    @DisplayName("Deve retornar uma exceção quando um gerente for atribuido como um membro de um projeto")
+    void validarCargoMembroFalha() {
         Long gerenteId = 2L;
         List<Long> membrosId = List.of(1L,gerenteId,3L,4L);
         ProjetoDto projetoTeste = new ProjetoDto(
@@ -257,7 +282,7 @@ class ProjetoServiceTest {
                 new BigDecimal("500"),
                 "ProjetoTeste",
                 gerenteId,
-                null
+                membrosId
         );
 
         when(membroApiMockada.consultarID(gerenteId)).thenReturn(new MembroDto("Kauã", "Gerente"));
