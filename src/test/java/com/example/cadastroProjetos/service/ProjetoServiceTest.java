@@ -201,8 +201,30 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Não deve retornar uma exceção quando um gerente for atribuido corretamente")
+    void validarCargoGerenteSucesso() {
+        ProjetoDto projetoTeste = new ProjetoDto(
+                "ProjetoTeste",
+                LocalDate.now(),
+                LocalDate.now().plusMonths(2),
+                null,
+                new BigDecimal("500"),
+                "ProjetoTeste",
+                1L,
+                null
+        );
+
+        when(membroApiMockada.consultarID(projetoTeste.gerenteId()))
+                .thenReturn(new MembroDto("Kauã", "Gerente"));
+
+        assertDoesNotThrow(() -> {
+            projetoService.validarGerente(projetoTeste, Collections.emptyList());
+        });
+    }
+
+    @Test
     @DisplayName("Deve retornar uma exceção quando um funcionário for atribuido como gerente de um projeto ")
-    void membroNaoPodeSerGerente() {
+    void validarCargoGerenteFalha() {
         ProjetoDto projetoTeste = new ProjetoDto(
                 "ProjetoTeste",
                 LocalDate.now(),
