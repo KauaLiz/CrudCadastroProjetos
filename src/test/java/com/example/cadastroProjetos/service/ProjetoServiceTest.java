@@ -133,8 +133,24 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Não deve retornar exceção caso não haja membros repetidos ao criar projeto")
+    void validarMembrosRepetidosSucesso(){
+        List<Long> membrosId = List.of(1L,2L,3L,4L,5L,6L,7L,8L);
+
+        for(Long id : membrosId){
+            when(membroApiMockada.consultarID(id)).thenReturn(new MembroDto("Membro" + id, "Funcionário"));
+
+            when(repository.contarProjetosMembroAtivo(id, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(0L);
+        }
+
+        assertDoesNotThrow(() -> {
+            projetoService.validarQuantidadeMembros(membrosId);
+        });
+    }
+
+    @Test
     @DisplayName("Deve retornar exceção se houver membros repetidos ao criar projeto")
-    void validarMembrosRepetidos(){
+    void validarMembrosRepetidosFalha(){
         List<Long> membrosId = List.of(1L,2L,2L,4L,5L,6L,7L,8L,9L,10L,11L);
 
         assertThrows(ValidacaoException.class, () -> {
