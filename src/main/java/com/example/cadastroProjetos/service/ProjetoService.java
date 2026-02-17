@@ -89,9 +89,7 @@ public class ProjetoService {
         repository.save(projeto);
     }
 
-    public RelatorioDto retornarDadosRelatorio(){
-        List<ProjetoEntity> projetos = repository.findAll();
-
+    private Map<Status,Long> qtdProjetosStatus(List<ProjetoEntity> projetos){
         Map<Status, Long> qtdProjetosStatus = new HashMap<>();
         for (ProjetoEntity projeto : projetos){
             Status status = projeto.getStatus();
@@ -102,7 +100,10 @@ public class ProjetoService {
 
             qtdProjetosStatus.put(status, qtdProjetosStatus.get(status) + 1);
         }
+        return qtdProjetosStatus;
+    }
 
+    private Map<Status,BigDecimal> totalOrcadoStatus(List<ProjetoEntity> projetos){
         Map<Status, BigDecimal> totalOrcadoStatus = new HashMap<>();
         BigDecimal valorAtual = null;
         for (ProjetoEntity projeto : projetos){
@@ -111,7 +112,10 @@ public class ProjetoService {
 
             totalOrcadoStatus.put(status, valorAtual.add(projeto.getOrcamento()));
         }
+        return totalOrcadoStatus;
+    }
 
+    private Long mediaDuracaoProjetos(List<ProjetoEntity> projetos){
         Long qtdProjetos = 0L;
         Long meses = 0L;
 
@@ -131,6 +135,10 @@ public class ProjetoService {
         } else {
             mediaDuracaoProjetos = 0L;
         }
+        return mediaDuracaoProjetos;
+    }
+
+    private Long qtdMembrosUnicos(List<ProjetoEntity> projetos){
 
         Set<Long> qtdMembroUnico = new HashSet<>();
 
@@ -139,14 +147,17 @@ public class ProjetoService {
                 qtdMembroUnico.add(membroId);
             }
         }
-
         long qtdMembrosUnicos = qtdMembroUnico.size();
+        return qtdMembrosUnicos;
+    }
 
+    public RelatorioDto retornarDadosRelatorio(){
+        List<ProjetoEntity> projetos = repository.findAll();
         RelatorioDto relatorioDto = new RelatorioDto(
-                qtdProjetosStatus,
-                totalOrcadoStatus,
-                mediaDuracaoProjetos,
-                qtdMembrosUnicos
+                qtdProjetosStatus(projetos),
+                totalOrcadoStatus(projetos),
+                mediaDuracaoProjetos(projetos),
+                qtdMembrosUnicos(projetos)
         );
 
         return relatorioDto;
