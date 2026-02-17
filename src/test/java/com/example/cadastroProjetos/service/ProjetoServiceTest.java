@@ -62,8 +62,18 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Não deve retornar exceção pois o cargo está correto")
+    void validarMembroCargoSucesso() {
+        when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
+
+        assertDoesNotThrow(() ->{
+            projetoService.validarMembroIndividual(1L);
+        });
+    }
+
+    @Test
     @DisplayName("Deve retornar exceção referente ao cargo estar diferente de funcionário")
-    void validarMembroCargoErrado() {
+    void validarMembroCargoFalha() {
         when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Gerente"));
 
         assertThrows(RegraNegocioException.class, () ->{
