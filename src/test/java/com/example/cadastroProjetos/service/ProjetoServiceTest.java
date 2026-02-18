@@ -5,6 +5,7 @@ import com.example.cadastroProjetos.customException.RegraNegocioException;
 import com.example.cadastroProjetos.customException.ValidacaoException;
 import com.example.cadastroProjetos.model.dto.MembroDto;
 import com.example.cadastroProjetos.model.dto.ProjetoDto;
+import com.example.cadastroProjetos.model.dto.ProjetoResponseDto;
 import com.example.cadastroProjetos.model.dto.RelatorioDto;
 import com.example.cadastroProjetos.model.entity.ProjetoEntity;
 import com.example.cadastroProjetos.model.enums.ClassificacaoRisco;
@@ -390,11 +391,54 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void transformarDto() {
-    }
-
-    @Test
+    @DisplayName("Deve retornar uma lista de todos os projetos")
     void mostrarProjetos() {
+        ProjetoEntity projeto_teste1 = new ProjetoEntity();
+        projeto_teste1.setNome("Teste1");
+        projeto_teste1.setDataInicio(LocalDate.now());
+        projeto_teste1.setPrevisaoTermino(LocalDate.now().plusMonths(2));
+        projeto_teste1.setDescricao("Descrição");
+        projeto_teste1.setGerente(1L);
+        projeto_teste1.setOrcamento(new BigDecimal("100"));
+        projeto_teste1.setMembrosIds(List.of(2L,3L));
+        projeto_teste1.setStatus(Status.EM_ANALISE);
+
+        ProjetoEntity projeto_teste2 = new ProjetoEntity();
+        projeto_teste2.setNome("Teste2");
+        projeto_teste2.setDataInicio(LocalDate.now());
+        projeto_teste2.setPrevisaoTermino(LocalDate.now().plusMonths(5));
+        projeto_teste2.setDescricao("Descrição");
+        projeto_teste2.setGerente(4L);
+        projeto_teste2.setOrcamento(new BigDecimal("150"));
+        projeto_teste2.setMembrosIds(List.of(5L,6L));
+        projeto_teste2.setStatus(Status.EM_ANDAMENTO);
+
+        ProjetoEntity projeto_teste3 = new ProjetoEntity();
+        projeto_teste3.setNome("Teste3");
+        projeto_teste3.setDataInicio(LocalDate.now());
+        projeto_teste3.setPrevisaoTermino(LocalDate.now().plusMonths(7));
+        projeto_teste3.setDataTermino(LocalDate.now().plusMonths(7));
+        projeto_teste3.setDescricao("Descrição");
+        projeto_teste3.setGerente(7L);
+        projeto_teste3.setOrcamento(new BigDecimal("200"));
+        projeto_teste3.setMembrosIds(List.of(8L,9L));
+        projeto_teste3.setStatus(Status.ENCERRADO);
+
+        List<ProjetoEntity> projetos = List.of(projeto_teste1, projeto_teste2, projeto_teste3);
+        when(repository.findAll()).thenReturn(projetos);
+
+        List<ProjetoResponseDto> projetoDtos = projetoService.mostrarProjetos();
+
+        assertEquals(3, projetoDtos.size());
+        
+        assertEquals("Teste1", projetoDtos.get(0).nome());
+        assertEquals(Status.EM_ANALISE, projetoDtos.get(0).status());
+
+        assertEquals("Teste2", projetoDtos.get(1).nome());
+        assertEquals(Status.EM_ANDAMENTO, projetoDtos.get(1).status());
+
+        assertEquals("Teste3", projetoDtos.get(2).nome());
+        assertEquals(Status.ENCERRADO, projetoDtos.get(2).status());
     }
 
     @Test
