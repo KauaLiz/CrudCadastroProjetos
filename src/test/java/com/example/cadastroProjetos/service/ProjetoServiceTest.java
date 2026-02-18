@@ -430,7 +430,7 @@ class ProjetoServiceTest {
         List<ProjetoResponseDto> projetoDtos = projetoService.mostrarProjetos();
 
         assertEquals(3, projetoDtos.size());
-        
+
         assertEquals("Teste1", projetoDtos.get(0).nome());
         assertEquals(Status.EM_ANALISE, projetoDtos.get(0).status());
 
@@ -439,6 +439,17 @@ class ProjetoServiceTest {
 
         assertEquals("Teste3", projetoDtos.get(2).nome());
         assertEquals(Status.ENCERRADO, projetoDtos.get(2).status());
+    }
+
+    @Test
+    @DisplayName("Deve retornar uma lista vazia quando não houver projetos")
+    void mostrarProjetosFalha() {
+        List<ProjetoEntity> projetos = List.of();
+        when(repository.findAll()).thenReturn(projetos);
+
+        List<ProjetoResponseDto> projetoDtos = projetoService.mostrarProjetos();
+
+        assertTrue(projetoDtos.isEmpty());
     }
 
     @Test
