@@ -392,7 +392,7 @@ class ProjetoServiceTest {
 
     @Test
     @DisplayName("Deve retornar uma lista de todos os projetos")
-    void mostrarProjetos() {
+    void mostrarProjetosSucesso() {
         ProjetoEntity projeto_teste1 = new ProjetoEntity();
         projeto_teste1.setNome("Teste1");
         projeto_teste1.setDataInicio(LocalDate.now());
