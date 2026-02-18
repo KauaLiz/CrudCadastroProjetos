@@ -3,10 +3,7 @@ package com.example.cadastroProjetos.service;
 import com.example.cadastroProjetos.customException.RecursoNaoEncontradoException;
 import com.example.cadastroProjetos.customException.RegraNegocioException;
 import com.example.cadastroProjetos.customException.ValidacaoException;
-import com.example.cadastroProjetos.model.dto.MembroDto;
-import com.example.cadastroProjetos.model.dto.ProjetoDto;
-import com.example.cadastroProjetos.model.dto.ProjetoResponseDto;
-import com.example.cadastroProjetos.model.dto.RelatorioDto;
+import com.example.cadastroProjetos.model.dto.*;
 import com.example.cadastroProjetos.model.entity.ProjetoEntity;
 import com.example.cadastroProjetos.model.enums.ClassificacaoRisco;
 import com.example.cadastroProjetos.model.enums.Status;
@@ -20,11 +17,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -453,7 +452,30 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void adicionarMembros() {
+    @DisplayName("Deve adicionar um membro com sucesso")
+    void adicionarMembrosSucesso() {
+        Long projetoID = 1L;
+        List<Long> membrosId = List.of(4L,5L);
+        ProjetoRequestDto projetoRequestDto = new ProjetoRequestDto(membrosId);
+
+        ProjetoEntity projeto_teste1 = new ProjetoEntity();
+        projeto_teste1.setGerente(1L);
+        projeto_teste1.setMembrosIds(new ArrayList<>(List.of(2L,3L)));
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
+
+        when(membroApiMockada.consultarID(4L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
+        when(membroApiMockada.consultarID(5L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
+
+        when(repository.contarProjetosMembroAtivo(4L, List.of(Status.ENCERRADO, Status.CANCELADO ))).thenReturn(0L);
+        when(repository.contarProjetosMembroAtivo(5L, List.of(Status.ENCERRADO, Status.CANCELADO ))).thenReturn(0L);
+
+        ProjetoResponseDto responseDto = projetoService.adicionarMembros(projetoID, projetoRequestDto);
+
+        assertEquals(4, projeto_teste1.getMembrosIds().size());
+        assertEquals(4, responseDto.membrosIds().size());
+        assertTrue(projeto_teste1.getMembrosIds().contains(4L));
+        assertTrue(projeto_teste1.getMembrosIds().contains(5L));
     }
 
     @Test
