@@ -24,8 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class ProjetoServiceTest {
@@ -492,6 +491,29 @@ class ProjetoServiceTest {
         });
         assertEquals("Projeto com ID " + projetoID + " não encontrado", exception.getMessage());
         verify(repository).findById(projetoID);
+    }
+
+    @Test
+    @DisplayName("Deve retornar uma exceção quando algum membro não existir")
+    void adicionarMembrosFalha_membroNaoExistir() {
+        Long projetoID = 1L;
+        List<Long> membrosId = List.of(4L);
+        ProjetoRequestDto projetoRequestDto = new ProjetoRequestDto(membrosId);
+
+        ProjetoEntity projeto_teste1 = new ProjetoEntity();
+        projeto_teste1.setGerente(1L);
+        projeto_teste1.setMembrosIds(new ArrayList<>(List.of(2L,3L)));
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
+
+        when(membroApiMockada.consultarID(4L)).thenReturn(null);
+
+        assertThrows(RecursoNaoEncontradoException.class, () -> {
+            projetoService.adicionarMembros(projetoID,projetoRequestDto);
+        });
+        verify(repository).findById(projetoID);
+        verify(membroApiMockada).consultarID(4L);
+        verify(repository, never()).save(any());
     }
 
     @Test
