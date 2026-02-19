@@ -537,6 +537,27 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar uma exceção caso for adicionado um membro que já está no projeto")
+    void adicionarMembrosFalha_membroDuplicado() {
+        Long projetoID = 1L;
+        List<Long> membrosId = List.of(4L);
+        ProjetoRequestDto projetoRequestDto = new ProjetoRequestDto(membrosId);
+
+        ProjetoEntity projeto_teste1 = new ProjetoEntity();
+        projeto_teste1.setGerente(1L);
+        projeto_teste1.setMembrosIds(new ArrayList<>(List.of(2L,4L)));
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
+
+        ValidacaoException exception = assertThrows(ValidacaoException.class, () -> {
+            projetoService.adicionarMembros(projetoID,projetoRequestDto);
+        });
+        assertEquals("Membro com o ID 4 já está incluso no projeto", exception.getMessage());
+        verify(repository).findById(projetoID);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void retornaProximoStatus() {
     }
 
