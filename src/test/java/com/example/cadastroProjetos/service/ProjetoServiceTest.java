@@ -479,6 +479,22 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar uma exceção quando o projeto não for encontrado")
+    void adicionarMembrosFalha_projetoNaoEncontrado() {
+        Long projetoID = 1L;
+        List<Long> membrosId = List.of(4L,5L);
+        ProjetoRequestDto projetoRequestDto = new ProjetoRequestDto(membrosId);
+
+        when(repository.findById(projetoID)).thenReturn(Optional.empty());
+
+        RecursoNaoEncontradoException exception = assertThrows(RecursoNaoEncontradoException.class, () ->{
+           projetoService.adicionarMembros(projetoID, projetoRequestDto);
+        });
+        assertEquals("Projeto com ID " + projetoID + " não encontrado", exception.getMessage());
+        verify(repository).findById(projetoID);
+    }
+
+    @Test
     void retornaProximoStatus() {
     }
 
