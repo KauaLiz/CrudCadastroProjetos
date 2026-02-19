@@ -200,7 +200,7 @@ public class ProjetoService {
             if(membrosAtuais.contains(idRequest)) throw new ValidacaoException("Membro com o ID " + idRequest +" já está incluso no projeto");
         }
 
-        if (membrosAtuais.contains(projeto.getGerenteID())) throw new RegraNegocioException("Gerente não pode ser membro");
+        if (membrosRequest.contains(projeto.getGerenteID())) throw new RegraNegocioException("Gerente não pode ser membro");
 
         membrosRequest.forEach(this::validarMembroIndividual);
 
