@@ -517,6 +517,26 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar uma exceção quando exceder o limite de 10 membros por projeto")
+    void adicionarMembrosFalha_limiteMembrosPorProjeto() {
+        Long projetoID = 1L;
+        List<Long> membrosId = List.of(4L);
+        ProjetoRequestDto projetoRequestDto = new ProjetoRequestDto(membrosId);
+
+        ProjetoEntity projeto_teste1 = new ProjetoEntity();
+        projeto_teste1.setGerente(1L);
+        projeto_teste1.setMembrosIds(new ArrayList<>(List.of(2L,3L,5L,6L,7L,8L,9L,10L,11L,12L)));
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
+
+        assertThrows(ValidacaoException.class, () -> {
+            projetoService.adicionarMembros(projetoID,projetoRequestDto);
+        });
+        verify(repository).findById(projetoID);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void retornaProximoStatus() {
     }
 
