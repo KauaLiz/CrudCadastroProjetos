@@ -602,6 +602,26 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar uma exceção caso a lista de novos membros estiver vazia")
+    void adicionarMembrosFalha_ListaMembrosVazia() {
+        Long projetoID = 1L;
+        List<Long> membrosId = List.of();
+        ProjetoRequestDto projetoRequestDto = new ProjetoRequestDto(membrosId);
+
+        ProjetoEntity projeto_teste1 = new ProjetoEntity();
+        projeto_teste1.setGerente(3L);
+        projeto_teste1.setMembrosIds(new ArrayList<>(List.of(1L,2L)));
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
+
+        ValidacaoException exception = assertThrows(ValidacaoException.class, () ->{
+            projetoService.adicionarMembros(projetoID, projetoRequestDto);
+        });
+        assertEquals("Lista de novos membros é obrigatória", exception.getMessage());
+        verify(repository).findById(projetoID);
+    }
+
+    @Test
     void retornaProximoStatus() {
     }
 
