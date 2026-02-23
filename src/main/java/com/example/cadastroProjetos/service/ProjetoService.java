@@ -194,6 +194,10 @@ public class ProjetoService {
         List<Long> membrosAtuais = projeto.getMembrosIds();
         List<Long> membrosRequest = data.membrosIds();
 
+        if(membrosRequest == null || membrosRequest.isEmpty()){
+            throw new ValidacaoException("Lista de novos membros é obrigatória");
+        }
+
         if (membrosAtuais.size() + membrosRequest.size() > 10) throw new ValidacaoException("Quantidade de membros excede 10");
 
         for(Long idRequest : membrosRequest){
