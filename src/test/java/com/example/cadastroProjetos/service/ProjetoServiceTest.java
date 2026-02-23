@@ -558,6 +558,27 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve retornar uma exceção caso for adicionado um gerente ao invés de um membro")
+    void adicionarMembrosFalha_CargoErrado() {
+        Long projetoID = 1L;
+        Long gerenteID = 10L;
+        List<Long> membrosId = List.of(gerenteID);
+        ProjetoRequestDto projetoRequestDto = new ProjetoRequestDto(membrosId);
+
+        ProjetoEntity projeto_teste1 = new ProjetoEntity();
+        projeto_teste1.setGerente(3L);
+        projeto_teste1.setMembrosIds(new ArrayList<>(List.of(1L,2L)));
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
+        when(membroApiMockada.consultarID(gerenteID)).thenReturn(new MembroDto("Kauã", "Gerente"));
+
+        assertThrows(RegraNegocioException.class, () ->{
+           projetoService.adicionarMembros(projetoID, projetoRequestDto);
+        });
+        verify(repository).findById(projetoID);
+    }
+
+    @Test
     void retornaProximoStatus() {
     }
 
