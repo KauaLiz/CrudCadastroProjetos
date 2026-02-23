@@ -572,8 +572,26 @@ class ProjetoServiceTest {
         when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
         when(membroApiMockada.consultarID(gerenteID)).thenReturn(new MembroDto("Kauã", "Gerente"));
 
-        assertThrows(RegraNegocioException.class, () ->{
            projetoService.adicionarMembros(projetoID, projetoRequestDto);
+        });
+    @Test
+    @DisplayName("Deve retornar uma exceção caso o membro esteja em 3 ou mais projetos")
+    void adicionarMembrosFalha_MembroExcedeuLimiteDeProjetos() {
+        Long projetoID = 1L;
+        Long membroId = 10L;
+        List<Long> membrosId = List.of(membroId);
+        ProjetoRequestDto projetoRequestDto = new ProjetoRequestDto(membrosId);
+
+        ProjetoEntity projeto_teste1 = new ProjetoEntity();
+        projeto_teste1.setGerente(3L);
+        projeto_teste1.setMembrosIds(new ArrayList<>(List.of(1L,2L)));
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
+        when(membroApiMockada.consultarID(membroId)).thenReturn(new MembroDto("Kauã", "Membro"));
+        when(repository.contarProjetosMembroAtivo(membroId,List.of(Status.ENCERRADO,Status.CANCELADO))).thenReturn(3L);
+
+        assertThrows(RegraNegocioException.class, () ->{
+            projetoService.adicionarMembros(projetoID, projetoRequestDto);
         });
         verify(repository).findById(projetoID);
     }
