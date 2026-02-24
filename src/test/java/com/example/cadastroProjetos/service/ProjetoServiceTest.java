@@ -655,6 +655,23 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar exceção ao tentar avançar o status do projeto cancelado")
+    void avancarStatusFalha_projetoCancelado() {
+        Long projetoID = 1L;
+        Status status = Status.CANCELADO;
+        ProjetoEntity projetoTeste = new ProjetoEntity();
+        projetoTeste.setStatus(status);
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projetoTeste));
+
+        assertThrows(RegraNegocioException.class, () ->{
+            projetoService.avancarStatus(projetoID);
+        });
+        verify(repository).findById(projetoID);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("Deve lançar uma exceção quando o projeto não existir")
     void avancarStatusProjetoInexistente() {
         Long projetoID = 1L;
