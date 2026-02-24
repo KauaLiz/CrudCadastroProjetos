@@ -87,7 +87,6 @@ class ProjetoServiceTest {
     @DisplayName("Não deve retornar exceção pois o membro não está em pelo menos 3 projetos")
     void validarLimiteTresMembrosPorProjetoSucesso(){
         when(membroApiMockada.consultarID(1L)).thenReturn(new MembroDto("Kauã", "Funcionário"));
-
         when(repository.contarProjetosMembroAtivo(1L, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(2L);
 
         assertDoesNotThrow(() ->{
@@ -114,7 +113,6 @@ class ProjetoServiceTest {
 
         for(Long id : membrosId){
             when(membroApiMockada.consultarID(id)).thenReturn(new MembroDto("Membro" + id, "Funcionário"));
-
             when(repository.contarProjetosMembroAtivo(id, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(0L);
         }
 
@@ -140,7 +138,6 @@ class ProjetoServiceTest {
 
         for(Long id : membrosId){
             when(membroApiMockada.consultarID(id)).thenReturn(new MembroDto("Membro" + id, "Funcionário"));
-
             when(repository.contarProjetosMembroAtivo(id, List.of(Status.ENCERRADO, Status.CANCELADO))).thenReturn(0L);
         }
 
@@ -505,7 +502,6 @@ class ProjetoServiceTest {
         projeto_teste1.setMembrosIds(new ArrayList<>(List.of(2L,3L)));
 
         when(repository.findById(projetoID)).thenReturn(Optional.of(projeto_teste1));
-
         when(membroApiMockada.consultarID(4L)).thenReturn(null);
 
         assertThrows(RecursoNaoEncontradoException.class, () -> {
@@ -680,6 +676,7 @@ class ProjetoServiceTest {
         RecursoNaoEncontradoException exception = assertThrows(RecursoNaoEncontradoException.class, () ->{
             projetoService.avancarStatus(projetoID);
         });
+
         assertEquals("Projeto com ID " + projetoID + " não encontrado", exception.getMessage());
         verify(repository).findById(projetoID);
         verify(repository, never()).save(any());
@@ -708,6 +705,7 @@ class ProjetoServiceTest {
         RecursoNaoEncontradoException exception = assertThrows(RecursoNaoEncontradoException.class, () ->{
             projetoService.cancelarProjeto(projetoID);
         });
+
         assertEquals("Projeto com ID " + projetoID + " não encontrado", exception.getMessage());
         verify(repository).findById(projetoID);
         verify(repository, never()).save(any());
