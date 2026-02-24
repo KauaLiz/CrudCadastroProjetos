@@ -669,7 +669,17 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void cancelarProjeto() {
+    @DisplayName("Deve cancelar um projeto com sucesso")
+    void cancelarProjetoSucesso() {
+        Long projetoID = 1L;
+        ProjetoEntity projetoTeste = new ProjetoEntity();
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projetoTeste));
+        
+        projetoService.cancelarProjeto(projetoID);
+
+        assertEquals(Status.CANCELADO, projetoTeste.getStatus());
+        verify(repository).save(projetoTeste);
     }
 
     @Test
