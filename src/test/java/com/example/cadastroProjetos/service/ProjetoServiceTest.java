@@ -776,4 +776,20 @@ class ProjetoServiceTest {
         verify(repository).findById(projetoID);
         verify(repository, never()).delete(any());
     }
+
+    @Test
+    @DisplayName("Deve retornar exceção quando projeto estiver com status iniciado")
+    void deletarProjetoFalha_ProjetoIniciado() {
+        Long projetoID = 1L;
+        ProjetoEntity projetoTeste = new ProjetoEntity();
+        projetoTeste.setStatus(Status.INICIADO);
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projetoTeste));
+
+        assertThrows(RegraNegocioException.class, () ->{
+            projetoService.deletarProjeto(projetoID);
+        });
+        verify(repository).findById(projetoID);
+        verify(repository, never()).delete(any());
+    }
 }
