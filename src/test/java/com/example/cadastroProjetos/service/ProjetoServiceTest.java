@@ -638,6 +638,20 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar uma exceção quando o projeto não existir")
+    void avancarStatusProjetoInexistente() {
+        Long projetoID = 1L;
+        when(repository.findById(projetoID)).thenReturn(Optional.empty());
+
+        RecursoNaoEncontradoException exception = assertThrows(RecursoNaoEncontradoException.class, () ->{
+            projetoService.avancarStatus(projetoID);
+        });
+        assertEquals("Projeto com ID " + projetoID + " não encontrado", exception.getMessage());
+        verify(repository).findById(projetoID);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void cancelarProjeto() {
     }
 
