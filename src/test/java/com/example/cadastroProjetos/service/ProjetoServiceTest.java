@@ -675,11 +675,25 @@ class ProjetoServiceTest {
         ProjetoEntity projetoTeste = new ProjetoEntity();
 
         when(repository.findById(projetoID)).thenReturn(Optional.of(projetoTeste));
-        
+
         projetoService.cancelarProjeto(projetoID);
 
         assertEquals(Status.CANCELADO, projetoTeste.getStatus());
         verify(repository).save(projetoTeste);
+    }
+
+    @Test
+    @DisplayName("Deve lançar uma exceção quando o projeto não existir")
+    void cancelarProjetoInexistente() {
+        Long projetoID = 1L;
+        when(repository.findById(projetoID)).thenReturn(Optional.empty());
+
+        RecursoNaoEncontradoException exception = assertThrows(RecursoNaoEncontradoException.class, () ->{
+            projetoService.cancelarProjeto(projetoID);
+        });
+        assertEquals("Projeto com ID " + projetoID + " não encontrado", exception.getMessage());
+        verify(repository).findById(projetoID);
+        verify(repository, never()).save(any());
     }
 
     @Test
