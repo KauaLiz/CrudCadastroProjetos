@@ -763,4 +763,17 @@ class ProjetoServiceTest {
         verify(repository).findById(projetoID);
         verify(repository).delete(projetoTeste);
     }
+
+    @Test
+    @DisplayName("Deve retornar exceção quando projeto não existir")
+    void deletarProjetoFalha_ProjetoInexistente() {
+        Long projetoID = 1L;
+        when(repository.findById(projetoID)).thenReturn(Optional.empty());
+
+        assertThrows(RegraNegocioException.class, () ->{
+            projetoService.deletarProjeto(projetoID);
+        });
+        verify(repository).findById(projetoID);
+        verify(repository, never()).delete(any());
+    }
 }
