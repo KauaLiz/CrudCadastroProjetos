@@ -265,6 +265,10 @@ public class ProjetoService {
                         new RegraNegocioException("Projeto com ID " + id + " não encontrado")
                 );
 
+        if(projeto.getStatus() == Status.INICIADO || projeto.getStatus() == Status.EM_ANDAMENTO || projeto.getStatus() == Status.ENCERRADO){
+            throw new RegraNegocioException("Não é possível remover um projeto com status " + projeto.getStatus());
+        }
+
         repository.delete(projeto);
     }
 }
