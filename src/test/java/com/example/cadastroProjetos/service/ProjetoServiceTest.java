@@ -622,11 +622,19 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void retornaProximoStatus() {
-    }
+    @DisplayName("Deve avançar o status do projeto com sucesso")
+    void avancarStatusSucesso() {
+        Long projetoID = 1L;
+        Status status = Status.PLANEJADO;
+        ProjetoEntity projetoTeste = new ProjetoEntity();
+        projetoTeste.setStatus(status);
 
-    @Test
-    void avancarStatus() {
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projetoTeste));
+        projetoService.avancarStatus(projetoID);
+
+        assertEquals(Status.EM_ANDAMENTO, projetoTeste.getStatus());
+        verify(repository).findById(projetoID);
+        verify(repository).save(projetoTeste);
     }
 
     @Test
