@@ -733,6 +733,25 @@ class ProjetoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve lançar uma exceção quando o projeto já estiver encerrado")
+    void cancelarProjetoEncerradoFalha() {
+        Long projetoID = 1L;
+
+        ProjetoEntity projetoTeste = new ProjetoEntity();
+        projetoTeste.setStatus(Status.ENCERRADO);
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projetoTeste));
+
+        ValidacaoException exception = assertThrows(ValidacaoException.class, () ->{
+            projetoService.cancelarProjeto(projetoID);
+        });
+
+        assertEquals("Projeto já está com status de " + projetoTeste.getStatus(), exception.getMessage());
+        verify(repository).findById(projetoID);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void deletarProjeto() {
     }
 }
