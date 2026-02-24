@@ -251,6 +251,10 @@ public class ProjetoService {
                         new RecursoNaoEncontradoException("Projeto com ID " + id + " não encontrado")
                 );
 
+        if(projeto.getStatus() == Status.ENCERRADO || projeto.getStatus() ==  Status.CANCELADO){
+            throw new ValidacaoException("Projeto já está com status de " + projeto.getStatus());
+        }
+
         projeto.setStatus(Status.CANCELADO);
         repository.save(projeto);
     }
