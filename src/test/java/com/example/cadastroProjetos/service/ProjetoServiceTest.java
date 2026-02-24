@@ -750,6 +750,17 @@ class ProjetoServiceTest {
     }
 
     @Test
-    void deletarProjeto() {
+    @DisplayName("Deletar projeto com sucesso")
+    void deletarProjetoSucesso() {
+        Long projetoID = 1L;
+        ProjetoEntity projetoTeste = new ProjetoEntity();
+        projetoTeste.setStatus(Status.EM_ANALISE);
+
+        when(repository.findById(projetoID)).thenReturn(Optional.of(projetoTeste));
+
+        projetoService.deletarProjeto(projetoID);
+
+        verify(repository).findById(projetoID);
+        verify(repository).delete(projetoTeste);
     }
 }
